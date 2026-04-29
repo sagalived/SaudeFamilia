@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isMemberOfFamily(familyId) {
+      return isSignedIn() && getUserData().familyId == familyId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // Users
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.keys().hasAll(['name', 'email', 'role']) 
+                    && request.resource.data.role in ['parent', 'doctor'];
+      allow update: if isOwner(userId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'familyId', 'role']);
+    }
+
+    // Families
+    match /families/{familyId} {
+      allow get: if isMemberOfFamily(familyId) || isAdmin();
+      allow create: if isSignedIn(); // Basic creation for now
+      allow update: if isMemberOfFamily(familyId);
+    }
+
+    // Dependents
+    match /dependents/{dependentId} {
+      allow list: if isSignedIn(); // Filtered by familyId in query
+      allow get: if isSignedIn() && isMemberOfFamily(resource.data.familyId);
+      allow create: if isSignedIn() && isMemberOfFamily(request.resource.data.familyId);
+      allow update: if isSignedIn() && isMemberOfFamily(resource.data.familyId);
+      allow delete: if isSignedIn() && isMemberOfFamily(resource.data.familyId);
+    }
+
+    // Sub-records for dependents
+    match /growthMetrics/{id} {
+      allow list: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
+    }
+    match /vaccinations/{id} {
+      allow list: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
+    }
+    match /medicalRecords/{id} {
+      allow list: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
+    }
+  }
+}

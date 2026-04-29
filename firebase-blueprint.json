@@ -1,0 +1,112 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "App user (parent or doctor)",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["parent", "doctor", "admin"] },
+        "cpf": { "type": "string" },
+        "crm": { "type": "string" },
+        "familyId": { "type": "string" }
+      },
+      "required": ["name", "email", "role"]
+    },
+    "Family": {
+      "title": "Family Nucleus",
+      "description": "A group of users sharing access to dependents",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "members": { "type": "array", "description": "UIDs of family members" }
+      },
+      "required": ["name", "members"]
+    },
+    "Dependent": {
+      "title": "Dependent",
+      "description": "Child or elderly member being tracked",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "dob": { "type": "string", "format": "date" },
+        "sex": { "type": "string", "enum": ["M", "F"] },
+        "bloodType": { "type": "string" },
+        "allergies": { "type": "string" },
+        "chronicConditions": { "type": "string" },
+        "familyId": { "type": "string" },
+        "photoUrl": { "type": "string" }
+      },
+      "required": ["name", "dob", "familyId"]
+    },
+    "GrowthMetric": {
+      "title": "Growth Metric",
+      "description": "Height and weight recording",
+      "type": "object",
+      "properties": {
+        "dependentId": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "height": { "type": "number" },
+        "weight": { "type": "number" }
+      },
+      "required": ["dependentId", "date", "height", "weight"]
+    },
+    "Vaccination": {
+      "title": "Vaccination",
+      "description": "Vaccine record",
+      "type": "object",
+      "properties": {
+        "dependentId": { "type": "string" },
+        "vaccineName": { "type": "string" },
+        "dose": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "status": { "type": "string", "enum": ["applied", "pending"] }
+      },
+      "required": ["dependentId", "vaccineName", "date", "status"]
+    },
+    "MedicalRecord": {
+      "title": "Medical Record",
+      "description": "Clinical consultation data",
+      "type": "object",
+      "properties": {
+        "dependentId": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "specialty": { "type": "string" },
+        "doctorName": { "type": "string" },
+        "doctorCrm": { "type": "string" },
+        "symptoms": { "type": "string" },
+        "diagnosis": { "type": "string" },
+        "prescription": { "type": "string" },
+        "attachments": { "type": "array" }
+      },
+      "required": ["dependentId", "date", "specialty"]
+    }
+  },
+  "firestore": {
+    "users": {
+      "schema": "User",
+      "description": "Collection of user profiles"
+    },
+    "families": {
+      "schema": "Family",
+      "description": "Collection of family groups"
+    },
+    "dependents": {
+      "schema": "Dependent",
+      "description": "Collection of dependents"
+    },
+    "growthMetrics": {
+      "schema": "GrowthMetric",
+      "description": "Growth history for dependents"
+    },
+    "vaccinations": {
+      "schema": "Vaccination",
+      "description": "Vaccination history"
+    },
+    "medicalRecords": {
+      "schema": "MedicalRecord",
+      "description": "Consultation history"
+    }
+  }
+}

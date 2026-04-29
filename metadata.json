@@ -1,0 +1,12 @@
+{
+  "name": "Saude+F",
+  "description": "Prontuário Familiar Digital para centralização de histórico médico, vacinas e crescimento, ideal para pais e emergências.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "HEALTH_RECORDS",
+    "REALTIME_SYNC",
+    "GRAPHS"
+  ]
+}
